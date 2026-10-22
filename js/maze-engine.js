@@ -4,13 +4,14 @@ class MazeEngine {
   constructor(mazeElement) {
     this.mazeElement = mazeElement;
     this.playerElement = null;
+
     this.position = {
-      row: start.row,
-      col: start.col
+      row: START.row,
+      col: START.col
     };
 
-    this.direction = start.direction;
-    this.rotationAngle = 0;
+    this.direction = START.direction;
+    this.rotationAngle = DIRECTIONS[START.direction].rotation;
     this.isRunning = false;
   }
 
@@ -21,172 +22,183 @@ class MazeEngine {
   }
 
   renderMaze() {
-    this.mazeElement.innerHTML = "";
+    this.mazeElement.replaceChildren();
 
-    for (let row = 0; row < mazeSize; row += 1) {
-      for (let col = 0; col < mazeSize; col += 1) {
-        const tile = document.createElement("div");
-        tile.className = "tile";
-
-        const number = cellNumberAt(row, col);
-
-        if (number === null) {
-          tile.classList.add("outer-tile");
-        } else {
-          tile.classList.add("center-tile");
-        }
-
-        if (row === start.row && col === start.col) {
-          tile.classList.add("start-tile");
-        }
-
-        if (row === goal.row && col === goal.col) {
-          tile.classList.add("goal-tile");
-
-          // ゴール画像の追加
-          const goalImage = document.createElement("img");
-          goalImage.className = "goal-image";
-          goalImage.src = "./img/goal.png";
-          goalImage.alt = "ゴール";
-
-          tile.appendChild(goalImage);
-        }
-
-
-
-        this.addWallClasses(tile, row, col);
-
-        const label = document.createElement("span");
-        label.className = "tile-label";
-        label.textContent = getTileLabel(row, col);
-
-        // 入口・出口のラベルをセル下側に配置
-        if (label.textContent === "入口" || label.textContent === "出口") {
-          tile.classList.add("label-bottom-tile");
-        }
-
-        tile.appendChild(label);
+    for (let row = 0; row < MAZE_SIZE; row += 1) {
+      for (let col = 0; col < MAZE_SIZE; col += 1) {
+        const tile = this.createTile(row, col);
         this.mazeElement.appendChild(tile);
       }
     }
   }
 
-  // addWallClasses(tile, row, col) {
-  //   if (hasWallBetween(row, col, row - 1, col)) {
-  //     tile.classList.add("wall-top");
-  //   }
+  createTile(row, col) {
+    const tile = document.createElement("div");
+    tile.classList.add("tile");
 
-  //   if (hasWallBetween(row, col, row, col + 1)) {
-  //     tile.classList.add("wall-right");
-  //   }
+    const cellNumber = positionToCellNumber(row, col);
 
-  //   if (hasWallBetween(row, col, row + 1, col)) {
-  //     tile.classList.add("wall-bottom");
-  //   }
+    tile.classList.add(
+      cellNumber === null ? "outer-tile" : "center-tile"
+    );
 
-  //   if (hasWallBetween(row, col, row, col - 1)) {
-  //     tile.classList.add("wall-left");
-  //   }
-  // }
+    if (row === START.row && col === START.col) {
+      tile.classList.add("start-tile");
+    }
 
-  addWallClasses(tile, row, col) {
-  // 8x8マスの外側の壁は描画しない。
-  // ただし、6x6迷路本体の外壁は描画する。
+    if (row === GOAL.row && col === GOAL.col) {
+      tile.classList.add("goal-tile");
+      tile.appendChild(this.createGoalImage());
+    }
 
-  const addWallLine = (className) => {
-    const line = document.createElement("span");
-    line.className = `wall-line ${className}`;
-    tile.appendChild(line);
-  };
+    this.addWallLines(tile, row, col);
 
-  // 上壁
-  if (
-    row > 0 &&
-    hasWallBetween(row, col, row - 1, col)
-  ) {
-    addWallLine("wall-line-top");
+    const label = document.createElement("span");
+    label.className = "tile-label";
+    label.textContent = getTileLabel(row, col);
+
+    if (label.textContent) {
+      tile.classList.add("label-bottom-tile");
+    }
+
+    tile.appendChild(label);
+
+    return tile;
   }
 
-  // 右壁
-  if (
-    col < mazeSize - 1 &&
-    hasWallBetween(row, col, row, col + 1)
-  ) {
-    addWallLine("wall-line-right");
+  createGoalImage() {
+    const image = document.createElement("img");
+
+    image.className = "goal-image";
+    image.src = "./img/goal.png";
+    image.alt = "ゴール";
+
+    return image;
   }
 
-  // 下壁
-  if (
-    row < mazeSize - 1 &&
-    hasWallBetween(row, col, row + 1, col)
-  ) {
-    addWallLine("wall-line-bottom");
+  // addWallLines(tile, row, col) {
+  //   const wallDefinitions = [
+  //     {
+  //       className: "wall-line-top",
+  //       canCheck: row > 0,
+  //       nextRow: row - 1,
+  //       nextCol: col
+  //     },
+  //     {
+  //       className: "wall-line-right",
+  //       canCheck: col < MAZE_SIZE - 1,
+  //       nextRow: row,
+  //       nextCol: col + 1
+  //     },
+  //     {
+  //       className: "wall-line-bottom",
+  //       canCheck: row < MAZE_SIZE - 1,
+  //       nextRow: row + 1,
+  //       nextCol: col
+  //     },
+  //     {
+  //       className: "wall-line-left",
+  //       canCheck: col > 0,
+  //       nextRow: row,
+  //       nextCol: col - 1
+  //     }
+  //   ];
+
+  //   wallDefinitions.forEach((wall) => {
+  //     if (
+  //       wall.canCheck &&
+  //       hasWallBetween(row, col, wall.nextRow, wall.nextCol)
+  //     ) {
+  //       const wallElement = document.createElement("span");
+  //       wallElement.className = `wall-line ${wall.className}`;
+  //       tile.appendChild(wallElement);
+  //     }
+  //   });
+  // }
+
+  addWallLines(tile, row, col) {
+  /*
+   * 壁線は中央6×6迷路のセルからだけ描画する。
+   *
+   * 外周通路のセルからも壁を描画すると、
+   * 中央セルとの間に同じ壁が二重に作成され、
+   * 迷路の四隅などに不要な壁が表示される。
+   */
+  if (!isCenterCell(row, col)) {
+    return;
   }
 
-  // 左壁
-  if (
-    col > 0 &&
-    hasWallBetween(row, col, row, col - 1)
-  ) {
-    addWallLine("wall-line-left");
-  }
+  const wallDefinitions = [
+    {
+      className: "wall-line-top",
+      canCheck: row > 0,
+      nextRow: row - 1,
+      nextCol: col
+    },
+    {
+      className: "wall-line-right",
+      canCheck: col < MAZE_SIZE - 1,
+      nextRow: row,
+      nextCol: col + 1
+    },
+    {
+      className: "wall-line-bottom",
+      canCheck: row < MAZE_SIZE - 1,
+      nextRow: row + 1,
+      nextCol: col
+    },
+    {
+      className: "wall-line-left",
+      canCheck: col > 0,
+      nextRow: row,
+      nextCol: col - 1
+    }
+  ];
 
-  // if (row > 0 && hasWallBetween(row, col, row - 1, col)) {
-  //     tile.classList.add("wall-top");
-  // }
+  wallDefinitions.forEach((wall) => {
+    if (
+      wall.canCheck &&
+      hasWallBetween(row, col, wall.nextRow, wall.nextCol)
+    ) {
+      const wallElement = document.createElement("span");
+      wallElement.className = `wall-line ${wall.className}`;
 
-  // if (col < mazeSize - 1 &&
-  //     hasWallBetween(row, col, row, col + 1)) {
-  //     tile.classList.add("wall-right");
-  // }
-
-  // if (row < mazeSize - 1 &&
-  //     hasWallBetween(row, col, row + 1, col)) {
-  //     tile.classList.add("wall-bottom");
-  // }
-
-  // if (col > 0 && hasWallBetween(row, col, row, col - 1)) {
-  //     tile.classList.add("wall-left");
-  // }
-
-  }
-
-  // createPlayer() {
-  //   this.playerElement = document.createElement("div");
-  //   this.playerElement.className = "player";
-  //   this.playerElement.textContent = "➤";
-  //   this.mazeElement.appendChild(this.playerElement);
-  //   this.updatePlayerView(false);
-  // }
+      tile.appendChild(wallElement);
+    }
+  });
+}
 
   createPlayer() {
-  this.playerElement = document.createElement("div");
-  this.playerElement.className = "player";
+    this.playerElement = document.createElement("div");
+    this.playerElement.className = "player";
 
-  const playerImage = document.createElement("img");
-  playerImage.className = "player-image";
-  playerImage.src = "./img/player.png";
-  playerImage.alt = "プレイヤー";
+    const image = document.createElement("img");
+    image.className = "player-image";
+    image.src = "./img/player.png";
+    image.alt = "プレイヤー";
 
-  this.playerElement.appendChild(playerImage);
-  this.mazeElement.appendChild(this.playerElement);
+    this.playerElement.appendChild(image);
+    this.mazeElement.appendChild(this.playerElement);
 
-  this.updatePlayerView(false);
-}
+    this.updatePlayerView(false);
+  }
 
   reset() {
     this.position = {
-      row: start.row,
-      col: start.col
+      row: START.row,
+      col: START.col
     };
-    this.direction = start.direction;
-    this.rotationAngle = 0;
+
+    this.direction = START.direction;
+    this.rotationAngle = DIRECTIONS[START.direction].rotation;
     this.isRunning = false;
 
-    if (this.playerElement) {
-      this.playerElement.classList.remove("collision");
-      this.updatePlayerView(false);
+    if (!this.playerElement) {
+      return;
     }
+
+    this.playerElement.classList.remove("collision");
+    this.updatePlayerView(false);
   }
 
   updatePlayerView(animate = true) {
@@ -196,13 +208,15 @@ class MazeEngine {
 
     this.playerElement.style.setProperty("--row", this.position.row);
     this.playerElement.style.setProperty("--col", this.position.col);
-    this.playerElement.style.setProperty("--rotation",`${directions[this.direction].rotation}deg`);
-    // this.playerElement.style.setProperty("--rotation",`${this.rotationAngle}deg`);
+    this.playerElement.style.setProperty(
+      "--rotation",
+      `${this.rotationAngle}deg`
+    );
 
     if (!animate) {
       this.playerElement.style.transition = "none";
 
-      // ブラウザに即時反映させる
+      // CSSの再計算を発生させ、即座に位置を反映する
       void this.playerElement.offsetWidth;
 
       this.playerElement.style.transition = "";
@@ -211,49 +225,32 @@ class MazeEngine {
 
   rotate(turn) {
     this.direction =
-      (this.direction + turn + directions.length) % directions.length;
+      (this.direction + turn + DIRECTIONS.length) %
+      DIRECTIONS.length;
 
-    this.updatePlayerView(true);
+    this.rotationAngle += turn * 90;
+    this.updatePlayerView();
   }
 
-  // リファクタリング
-  // DIRECTIONSのrotationプロパティは、今回の表示処理では使用しなくなる
-
-//   async rotate(turn) {
-//   this.playerElement.classList.add("turning");
-
-//   // directionは移動方向の判定に使用
-//   this.direction =
-//     (this.direction + turn + DIRECTIONS.length) % DIRECTIONS.length;
-
-//   // 表示角度は折り返さず、累積させる
-//   // R: +90度、L: -90度
-//   this.rotationAngle += turn * 90;
-
-//   this.updatePlayerView(true);
-
-//   await wait(TURN_DURATION);
-
-//   this.playerElement.classList.remove("turning");
-// }
-
-
   async moveForward() {
-    const direction = directions[this.direction];
-    const nextRow = this.position.row + direction.dr;
-    const nextCol = this.position.col + direction.dc;
+    const direction = DIRECTIONS[this.direction];
 
-    if (
+    const nextRow = this.position.row + direction.row;
+    const nextCol = this.position.col + direction.col;
+
+    const cannotMove =
       !isInsideBoard(nextRow, nextCol) ||
       hasWallBetween(
         this.position.row,
         this.position.col,
         nextRow,
         nextCol
-      )
-    ) {
+      );
+
+    if (cannotMove) {
       this.showCollision();
       await wait(500);
+
       return {
         moved: false,
         reachedGoal: false
@@ -262,7 +259,7 @@ class MazeEngine {
 
     this.position.row = nextRow;
     this.position.col = nextCol;
-    this.updatePlayerView(true);
+    this.updatePlayerView();
 
     await wait(500);
 
@@ -275,7 +272,7 @@ class MazeEngine {
   showCollision() {
     this.playerElement.classList.remove("collision");
 
-    // 同じアニメーションを連続実行可能にする
+    // 同じアニメーションを連続再生するための処理
     void this.playerElement.offsetWidth;
 
     this.playerElement.classList.add("collision");
@@ -283,53 +280,51 @@ class MazeEngine {
 
   isGoal() {
     return (
-      this.position.row === goal.row &&
-      this.position.col === goal.col
+      this.position.row === GOAL.row &&
+      this.position.col === GOAL.col
     );
   }
 
   async execute(commands, callbacks = {}) {
     if (this.isRunning) {
-      return;
+      return false;
     }
 
     this.isRunning = true;
 
-    let instructionCount = 0;
-
     try {
-      for (const command of commands) {
-        instructionCount += 1;
+      for (
+        let index = 0;
+        index < commands.length;
+        index += 1
+      ) {
+        const command = commands[index];
+        const instructionCount = index + 1;
 
-        if (callbacks.onCommand) {
-          // callbacks.onCommand(command);
-          callbacks.onCommand(command, instructionCount);
-        }
+        callbacks.onCommand?.(command, instructionCount);
 
         if (command === "F") {
           const result = await this.moveForward();
 
           if (result.reachedGoal) {
-            if (callbacks.onGoal) {
-              callbacks.onGoal(instructionCount);
-            }
+            callbacks.onGoal?.(instructionCount);
             return true;
           }
-        } else if (command === "R") {
+        }
+
+        if (command === "R") {
           this.rotate(1);
           await wait(500);
-        } else if (command === "L") {
+        }
+
+        if (command === "L") {
           this.rotate(-1);
           await wait(500);
         }
       }
 
-      // 最後の指示でゴールした場合にも表示する
       if (this.isGoal()) {
-        if (callbacks.onGoal) {
-          callbacks.onGoal(instructionCount);
-        }
-
+        callbacks.onGoal?.(commands.length);
         return true;
       }
 
@@ -339,9 +334,7 @@ class MazeEngine {
     }
   }
 
-  // デバッグ用コントローラ
   async debugMove(directionIndex) {
-    // コマンド実行中はデバッグ操作を受け付けない
     if (this.isRunning) {
       return;
     }
@@ -349,21 +342,16 @@ class MazeEngine {
     this.isRunning = true;
 
     try {
-      // 押した方向へプレイヤーの向きを変更
       this.direction = directionIndex;
-      this.updatePlayerView(true);
+      this.rotationAngle = DIRECTIONS[directionIndex].rotation;
+      this.updatePlayerView();
 
-      // 少しだけ向き変更を表示してから移動
       await wait(100);
 
       const result = await this.moveForward();
 
       if (result.reachedGoal) {
-        console.log("ゴールしました");
-
-        if (this.onGoal) {
-          this.onGoal();
-        }
+        this.onGoal?.();
       }
     } finally {
       this.isRunning = false;
@@ -371,16 +359,11 @@ class MazeEngine {
   }
 
   setPlayerVisible(isVisible) {
-    if (!this.playerElement) {
-      return;
-    }
-
-    this.playerElement.classList.toggle(
+    this.playerElement?.classList.toggle(
       "player-hidden",
       !isVisible
     );
   }
-
 }
 
 function wait(milliseconds) {
@@ -388,7 +371,3 @@ function wait(milliseconds) {
     setTimeout(resolve, milliseconds);
   });
 }
-
-
-
-
