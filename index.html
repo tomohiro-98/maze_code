@@ -6,124 +6,97 @@
   <title>はじめてのプログラミング</title>
   <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
   <main class="app">
     <h1>はじめてのプログラミング</h1>
 
-    <!-- <section class="message">
-      <p>
-        コンピュータは、書かれたプログラムを上から順番に正確に実行します。
-      </p>
-      <p>
-        同じゴールでも、たどり着く方法は一つとは限りません。
-      </p>
-    </section> -->
+    <div class="game-layout">
+      <!-- コマンド入力エリア -->
+      <section class="controls" aria-labelledby="program-title">
+        <h2 id="program-title">プログラムを入力してください</h2>
 
-    <!-- <section class="instruction">
-      <h2>プログラム</h2>
-      <ul>
-        <li><code>F</code>：前に1マス進む</li>
-        <li><code>R</code>：右に90度回る</li>
-        <li><code>L</code>：左に90度回る</li>
-      </ul>
-      <p>例：<code>FFFRFRFL</code> または <code>fffrfrfl</code></p>
-    </section> -->
-<!-- 
-    <section class="controls">
-      <label for="commands">プログラムを入力してください</label>
+        <textarea
+          id="commands"
+          rows="3"
+          placeholder="例：FFFRFRFL"
+          spellcheck="false"
+          aria-label="実行するプログラム"
+        ></textarea>
 
-      <textarea
-        id="commands"
-        rows="3"
-        placeholder="例：FFRFFL"
-        spellcheck="false"
-      ></textarea>
+        <!-- 入力したコマンドを表示する場所 -->
+        <div
+          id="command-display"
+          class="command-display"
+          aria-label="実行するプログラム"
+        ></div>
 
-      <div class="button-row">
-        <button id="startButton" class="primary">スタート</button>
-        <button id="resetButton">リセット</button>
+        <div class="button-row">
+          <button id="startButton" class="primary" type="button">
+            スタート
+          </button>
+
+          <button id="resetButton" type="button">
+            リセット
+          </button>
+        </div>
+
+        <p id="status" class="status" aria-live="polite">
+          プログラムを入力してスタートしてください。
+        </p>
+      </section>
+
+      <!-- 迷路表示エリア -->
+      <section class="maze-section" aria-labelledby="maze-title">
+        <h2 id="maze-title" class="visually-hidden">迷路</h2>
+        <div id="maze" class="maze" aria-label="8x8迷路"></div>
+      </section>
+    </div>
+
+    <!-- 回答例 -->
+    <section aria-labelledby="example-title">
+      <h2 id="example-title">回答例</h2>
+
+      <div class="example-buttons">
+        <button type="button" data-example="A">回答例A</button>
+        <button type="button" data-example="B">回答例B</button>
+        <button type="button" data-example="C">回答例C</button>
+        <button type="button" data-example="D">回答例D</button>
       </div>
-
-      <p id="status" class="status">プログラムを入力してスタートしてください。</p>
     </section>
 
-    <section class="maze-section">
-      <div id="maze" class="maze" aria-label="8x8迷路"></div>
+    <!-- デバッグ操作 -->
+    <!-- <section
+      id="debug-control-panel"
+      class="debug-control-panel"
+      aria-label="デバッグ操作"
+    >
+      <div id="debug-controls" class="debug-controls">
+        <button type="button" data-direction="up" aria-label="上へ">↑</button>
+
+        <div class="debug-middle-buttons">
+          <button type="button" data-direction="left" aria-label="左へ">←</button>
+          <button type="button" data-direction="down" aria-label="下へ">↓</button>
+          <button type="button" data-direction="right" aria-label="右へ">→</button>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        id="toggle-player-button"
+        aria-pressed="false"
+      >
+        🐭
+      </button>
     </section> -->
-
-<div class="game-layout">
-  <section class="controls">
-    <label for="commands">プログラムを入力してください</label>
-
-    <textarea
-      id="commands"
-      rows="3"
-      placeholder="例：FFRFFL"
-      spellcheck="false"
-    ></textarea>
-
-    <div class="button-row">
-      <button id="startButton" class="primary">スタート</button>
-      <button id="resetButton">リセット</button>
-    </div>
-
-    <p id="status" class="status">
-      プログラムを入力してスタートしてください。
-    </p>
-  </section>
-
-  <section class="maze-section">
-    <div id="maze" class="maze" aria-label="8x8迷路"></div>
-  </section>
-</div>
-
-<h2>回答例</h2>
-<div class="example-buttons">
-  <button type="button" data-example="A">回答例A</button>
-  <button type="button" data-example="B">回答例B</button>
-  <button type="button" data-example="C">回答例C</button>
-  <button type="button" data-example="D">回答例D</button>
-</div>
-
-<!-- 
-<div id="debug-control-panel" class="debug-control-panel">
-  <div id="debug-controls" class="debug-controls">
-    <button type="button" data-direction="up" aria-label="上へ">
-      ↑
-    </button>
-
-    <div class="debug-middle-buttons">
-      <button type="button" data-direction="left" aria-label="左へ">
-        ←
-      </button>
-
-      <button type="button" data-direction="down" aria-label="下へ">
-        ↓
-      </button>
-
-      <button type="button" data-direction="right" aria-label="右へ">
-        →
-      </button>
-    </div>
-  </div>
-
-  <button
-    type="button"
-    id="toggle-player-button"
-    aria-pressed="false"
-  >
-    ▶️
-  </button>
-</div> -->
-
   </main>
 
   <script src="./js/maze-data.js"></script>
   <script src="./js/maze-engine.js"></script>
+  <script src="./js/command-utils.js"></script>
   <script src="./js/ui.js"></script>
   <script src="./js/tests.js"></script>
-  <script src="js/debug-controls.js"></script>
+  <!-- <script src="./js/debug-controls.js"></script> -->
   <script src="./js/app.js"></script>
-
 </body>
 </html>
