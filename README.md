@@ -425,6 +425,7 @@ grid-template-rows: repeat(8, var(--cell-size));
 壁を設定するセルは、左右または上下に隣接している必要があります。
 VERTICAL_WALLS と HORIZONTAL_WALLS の変更内容は、迷路生成時に INTERNAL_WALLS へ反映されます。
 
+
 ## 注意事項
 
 画像の利用について
